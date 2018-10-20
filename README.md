@@ -17,9 +17,11 @@ This is an unofficial inplementation of [VoxelNet: End-to-End Learning for Point
 $ python3 setup.py build_ext --inplace
 ```
 3. Compile the evaluation code
-for Linux who alreay have Boost
 ```bash
 $ cd kitti_eval
+```
+for Linux who alreay have Boost
+```bash
 $ g++ -o evaluate_object_3d_offline evaluate_object_3d_offline.cpp
 ```
 for OSX you need to install Boost first and then
