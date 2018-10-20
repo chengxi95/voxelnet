@@ -17,9 +17,14 @@ This is an unofficial inplementation of [VoxelNet: End-to-End Learning for Point
 $ python3 setup.py build_ext --inplace
 ```
 3. Compile the evaluation code
+for Linux who alreay have Boost
 ```bash
 $ cd kitti_eval
 $ g++ -o evaluate_object_3d_offline evaluate_object_3d_offline.cpp
+```
+for OSX you need to install Boost first and then
+```bash
+$ g++ -O3 -DNDEBUG -I/PATH TO boost/version/include/ -o evaluate_object_3d_offline evaluate_object_3d_offline.cpp
 ```
 4. grant the execution permission to evaluation script
 ```bash
@@ -55,7 +60,7 @@ $ chmod +x launch_test.sh
 1. Specify the GPUs to use in `config.py`
 2. run `train.py` with desired hyper-parameters to start training:
 ```bash
-$ python3 train.py --alpha 1 --beta 10
+$ python3 train.py --alpha 1.5 --beta 1.0
 ```
 Note that the hyper-parameter settings introduced in the paper are not able to produce high quality results. So, a different setting is specified here.
 
