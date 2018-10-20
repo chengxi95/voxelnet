@@ -28,9 +28,9 @@ parser.add_argument('-b', '--single-batch-size', type=int, nargs='?', default=2,
                     help='set batch size')
 parser.add_argument('-l', '--lr', type=float, nargs='?', default=0.001,
                     help='set learning rate')
-parser.add_argument('-al', '--alpha', type=float, nargs='?', default=1.0,
+parser.add_argument('-al', '--alpha', type=float, nargs='?', default=1.5,
                     help='set alpha in los function')
-parser.add_argument('-be', '--beta', type=float, nargs='?', default=10.0,
+parser.add_argument('-be', '--beta', type=float, nargs='?', default=1.0,
                     help='set beta in los function')
 parser.add_argument('--output-path', type=str, nargs='?',
                     default='./predictions', help='results output dir')
