@@ -19,7 +19,7 @@ class RPN3D(object):
     def __init__(self,
                  cls='Car',
                  single_batch_size=2,  # batch_size_per_gpu
-                 learning_rate=0.001,
+                 learning_rate=0.01,
                  max_gradient_norm=5.0,
                  alpha=1.5,
                  beta=1,
@@ -36,8 +36,11 @@ class RPN3D(object):
         self.beta = beta
         self.avail_gpus = avail_gpus
 
-        boundaries = [80, 120]
-        values = [ self.learning_rate, self.learning_rate * 0.1, self.learning_rate * 0.01 ]
+        #boundaries = [80, 120]
+        #values = [ self.learning_rate, self.learning_rate * 0.1, self.learning_rate * 0.01 ]
+        #the paper use a learning rate boundary 150,with learning rate 0.01 for first 150 epochs, and 0.001 for last 10 epochs
+        boundaries = [150]
+        values = [ self.learning_rate, self.learning_rate * 0.1]
         lr = tf.train.piecewise_constant(self.epoch, boundaries, values)
 
         # build graph
