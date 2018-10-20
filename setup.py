@@ -8,12 +8,14 @@
 # Created By : Jeasine Ma [jeasinema[at]gmail[dot]com]
 
 
-from distutils.core import setup
+from distutils.core import setup, Extension
 from Cython.Build import cythonize
+import numpy
 
 setup(
     name='box overlaps',
-    ext_modules=cythonize('./utils/box_overlaps.pyx')
+    ext_modules=cythonize('./utils/box_overlaps.pyx'),
+    include_dirs=[numpy.get_include()]
 )
 
 # solution for potential error related to numpy/arrayobject.h
