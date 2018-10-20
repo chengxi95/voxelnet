@@ -15,14 +15,17 @@ class VFELayer(object):
         super(VFELayer, self).__init__()
         self.units = int(out_channels / 2)
         with tf.variable_scope(name, reuse=tf.AUTO_REUSE) as scope:
+            #self.dense = tf.layers.Dense(
+            #    self.units, tf.nn.relu, name='dense', _reuse=tf.AUTO_REUSE, _scope=scope)
+            #should apply the relu after batch_norm
             self.dense = tf.layers.Dense(
-                self.units, tf.nn.relu, name='dense', _reuse=tf.AUTO_REUSE, _scope=scope)
+                self.units, name='dense', _reuse=tf.AUTO_REUSE, _scope=scope)
             self.batch_norm = tf.layers.BatchNormalization(
                 name='batch_norm', fused=True, _reuse=tf.AUTO_REUSE, _scope=scope)
 
     def apply(self, inputs, mask, training):
         # [K, T, 7] tensordot [7, units] = [K, T, units]
-        pointwise = self.batch_norm.apply(self.dense.apply(inputs), training)
+        pointwise = tf.nn.relu(self.batch_norm.apply(self.dense.apply(inputs), training))
 
         #n [K, 1, units]
         aggregated = tf.reduce_max(pointwise, axis=1, keep_dims=True)
