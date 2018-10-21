@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.misc import imread
+import os
+import errno
 
 CAM = 2
 
@@ -78,22 +80,117 @@ def align_img_and_pc(img_dir, pc_dir, calib_dir):
     points = np.array(points)
     return points
 
+'''
+create folder in following structure
+└── DATA_DIR
+       ├── training   <-- training data
+       |   ├── image_2
+       |   ├── label_2
+       |   └── velodyne
+       └── validation  <--- evaluation data
+       |   ├── image_2
+       |   ├── label_2
+       |   └── velodyne                    
+'''
+cwd = os.getcwd()
+try:
+    os.mkdir(os.path.join(cwd,'training'))
+    os.mkdir(os.path.join(cwd,'validation'))
+    os.mkdir(os.path.join(cwd,'training','image_2'))
+    os.mkdir(os.path.join(cwd,'training','label_2'))
+    os.mkdir(os.path.join(cwd,'training','velodyne'))
+    os.mkdir(os.path.join(cwd,'validation','image_2'))
+    os.mkdir(os.path.join(cwd,'validation','label_2'))
+    os.mkdir(os.path.join(cwd,'validation','velodyne'))
+except OSError as exc:
+    if exc.errno != errno.EEXIST:
+        raise
+    pass
+
+#target root for training and validation 
+training_image_2 = os.path.join(cwd,'training','image_2')
+training_label_2 = os.path.join(cwd,'training','label_2')
+training_velodyne = os.path.join(cwd,'training','velodyne')
+validation_image_2 = os.path.join(cwd,'validation','image_2')
+validation_label_2 = os.path.join(cwd,'validation','label_2')
+validation_velodyne = os.path.join(cwd,'validation','velodyne')
+
+#-------------------------------------------------------------------------------------------------------------
+
+#update the root of the data_object_image_2, data_object_velodyne, data_object_calib, label_2(training) and split file(ImageSets)
+data_object_image_dir = './../../'
+data_object_velodyne_dir = './../../'
+data_object_calib_dir = './../../'
+data_object_label_dir = './../../'
+split_dir = './../../'
+
+#-----------------------------------------------------------------------------------------------------------
 # update the following directories
-IMG_ROOT = '/media/hdc/KITTI/image/training/image_2/'
-PC_ROOT = '/media/hdc/KITTI/point_cloud/raw_bin_files/training/velodyne/'
-CALIB_ROOT = '/media/hdc/KITTI/calib/data_object_calib/training/calib/'
+IMG_ROOT = os.path.join(data_object_image_dir,'data_object_image_2','training','image_2')
+PC_ROOT = os.path.join(data_object_velodyne_dir,'data_object_velodyne','training','velodyne')
+CALIB_ROOT = os.path.join(data_object_calib_dir,'data_object_calib','training','calib')
+LABEL_ROOT = os.path.join(data_object_label_dir,'training','label_2')
+SPLIT_ROOT = os.path.join(split_dir,'ImageSets')
 
+# for training set
+for line in open(os.path.join(SPLIT_ROOT,'train.txt'), 'r').readlines():
 
+    #there is a space in every line except the last line of the orginial split file,we need to remove the space
+    if(len(line)!=6):
+        line = line[:-1]
+    img_dir = os.path.join(IMG_ROOT,line+'.png')
+    pc_dir = os.path.join(PC_ROOT,line+'.bin')
+    calib_dir = os.path.join(CALIB_ROOT,line+'.txt')
+    label_dir = os.path.join(LABEL_ROOT,line+'.txt')
 
+    if(os.path.exists(pc_dir)):
+        points = align_img_and_pc(img_dir, pc_dir, calib_dir)
+
+        #create output file in ./training/velodyne dir
+        output_name = os.path.join(training_velodyne,line+'.bin')
+        points[:,:4].astype('float32').tofile(output_name)
+
+    #move image_2 file and label_2 file into training set 
+    if(os.path.exists(img_dir)):
+        os.rename(img_dir,os.path.join(training_image_2,line+'.png'))
+    if(os.path.exists(label_dir)):
+        os.rename(label_dir,os.path.join(training_label_2,line+'.txt')) 
+
+# for validation set
+for line in open(os.path.join(SPLIT_ROOT,'val.txt'), 'r').readlines():
+
+    #there is a space in every line except the last line of the orginial split file,we need to remove the space
+    if(len(line)!=6)
+    line = line[:-1]
+    img_dir = os.path.join(IMG_ROOT,line+'.png')
+    pc_dir = os.path.join(PC_ROOT,line+'.bin')
+    calib_dir = os.path.join(CALIB_ROOT,line+'.txt')
+    label_dir = os.path.join(LABEL_ROOT,line+'.txt')
+
+    if(os.path.exists(pc_dir)):
+        points = align_img_and_pc(img_dir, pc_dir, calib_dir)
+
+        #create output file in ./validation/velodyne dir
+        output_name = os.path.join(validation_velodyne,line+'.bin')
+        points[:,:4].astype('float32').tofile(output_name)
+
+    #move image_2 file and label_2 file into validation set 
+    if(os.path.exists(img_dir)):
+        os.rename(img_dir,os.path.join(validation_image_2,line+'.png'))
+    if(os.path.exists(label_dir)):
+        os.rename(label_dir,os.path.join(validation_label_2,line+'.txt')) 
+
+'''
 for frame in range(0, 7481):
     img_dir = IMG_ROOT + '%06d.png' % frame
     pc_dir = PC_ROOT + '%06d.bin' % frame
     calib_dir = CALIB_ROOT + '%06d.txt' % frame
-
-    points = align_img_and_pc(img_dir, pc_dir, calib_dir)
+    if(os.path.exists(pc_dir)):
+        points = align_img_and_pc(img_dir, pc_dir, calib_dir)
     
-    output_name = PC_ROOT + frame + '.bin'
-    points[:,:4].astype('float32').tofile(output_name)
+        output_name = PC_ROOT + str(frame) + '.bin'
+        points[:,:4].astype('float32').tofile(output_name)
+'''
 
 
 
