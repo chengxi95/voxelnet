@@ -41,9 +41,7 @@ $ chmod +x launch_test.sh
     * Camera calibration matrices of object data set (16 MB): for visualization of predictions
     * Left color images of object data set (12 GB): for visualization of predictions
 
-2. In this project, we use the cropped point cloud data for training and validation. Point clouds outside the image coordinates are removed. Update the directories in `data/crop.py` and run `data/crop.py` to generate cropped data. Note that cropped point cloud data will overwrite raw point cloud data.
-
-2. Split the training set into training and validation set according to the protocol [here](https://xiaozhichen.github.io/files/mv3d/imagesets.tar.gz). And rearrange the folders to have the following structure:
+2. In this project, we use the cropped point cloud data for training and validation. Point clouds outside the image coordinates are removed. Update the directories of the files you just download and upzid(`data_object_image_2`,`data_object_velodyne`,`data_object_calib`,label_2(`training`)) in `data/crop.py` and run `data/crop.py` to generate cropped data. You also need to provide the directory of the upzipped [split file](https://xiaozhichen.github.io/files/mv3d/imagesets.tar.gz) which tell `data/crop.py` how to split training set into training and validation set. After running `data/crop.py`,the data will be split into a structure like 
 ```plain
 └── DATA_DIR
        ├── training   <-- training data
@@ -113,4 +111,6 @@ The current implementation and training scheme are able to produce results in th
 - [X] fix the infinite loop problem in `test.py`
 - [X] replace averaged calibration matrices with correct ones
 
-
+# Fixed error
+1. change default value of alpha and beta to 1.5 and 1.0(the value used in paper)
+2. put the Relu layer after batch normalization layer in VFELayer class in [group_pointcloudy.py](https://github.com/qianguih/voxelnet/blob/master/model/group_pointcloud.py)
