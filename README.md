@@ -41,17 +41,19 @@ $ chmod +x launch_test.sh
     * Camera calibration matrices of object data set (16 MB): for visualization of predictions
     * Left color images of object data set (12 GB): for visualization of predictions
 
-2. In this project, we use the cropped point cloud data for training and validation. Point clouds outside the image coordinates are removed. Update the directories of the files you just download and upzid(`data_object_image_2`,`data_object_velodyne`,`data_object_calib`,label_2(`training`)) in `data/crop.py` and run `data/crop.py` to generate cropped data. You also need to provide the directory of the upzipped [split file](https://xiaozhichen.github.io/files/mv3d/imagesets.tar.gz) which tell `data/crop.py` how to split training set into training and validation set. After running `data/crop.py`,the data will be split into a structure like 
+2. In this project, we use the cropped point cloud data for training and validation. Point clouds outside the image coordinates are removed. Update the directories of the files you just download and upzip(`data_object_image_2`,`data_object_velodyne`,`data_object_calib`,label_2(`training`)) in `data/crop.py` and run `data/crop.py` to generate cropped data. You also need to provide the directory of the upzipped [split file](https://xiaozhichen.github.io/files/mv3d/imagesets.tar.gz) which tell `data/crop.py` how to split training set into training and validation set. After running `data/crop.py`,the data will be split into a structure like 
 ```plain
 └── DATA_DIR
        ├── training   <-- training data
        |   ├── image_2
        |   ├── label_2
-       |   └── velodyne
+       |   ├── velodyne
+       |   └── calib
        └── validation  <--- evaluation data
        |   ├── image_2
        |   ├── label_2
-       |   └── velodyne
+       |   ├── velodyne
+       |   └── calib
 ```
         
 3. Update the dataset directory in `config.py` and `kitti_eval/launch_test.sh`
@@ -114,3 +116,8 @@ The current implementation and training scheme are able to produce results in th
 # Fixed error
 1. change default value of alpha and beta to 1.5 and 1.0(the value used in paper)
 2. put the Relu layer after batch normalization layer in VFELayer class in [group_pointcloudy.py](https://github.com/qianguih/voxelnet/blob/master/model/group_pointcloud.py)
+3. Fixed an error in data augmentation in `utils/data_aug.py` and `utils/kitti_loader.py`. The previous will augment the data even if there are enough points clouds. And the augmented data will replace the origin data. Now you can set a minimum number of point clouds with `MINPOINT` in `config.py`. If the number of point clouds is smaller than `MINPOINT`, `aug_data` will augment the data with the method mentioned in paper until it reaches the threshold
+
+# Main improvement
+1. Now the `data/crop.py` can read a split file and spilt image_2, label_2, velodyne and calib into the desire folder structure
+2. Now the `utils/data_aug.py` will use each training figure's own $P_{rect}$,$R^{(0)}_{rect}$ and $T^{cam}_{velo}$ matrix from its calib file to augment data 
