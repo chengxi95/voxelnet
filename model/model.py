@@ -62,6 +62,7 @@ class RPN3D(object):
         self.opt = tf.train.AdamOptimizer(lr)
         self.gradient_norm = []
         self.tower_grads = []
+
         with tf.variable_scope(tf.get_variable_scope()):
             for idx, dev in enumerate(self.avail_gpus):
                 with tf.device('/gpu:{}'.format(dev)), tf.name_scope('gpu_{}'.format(dev)):
@@ -192,16 +193,19 @@ class RPN3D(object):
 
         input_feed = {}
         input_feed[self.is_train] = True
-        for idx in range(len(self.avail_gpus)):
-            input_feed[self.vox_feature[idx]] = vox_feature[idx]
-            input_feed[self.vox_number[idx]] = vox_number[idx]
-            input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
-            input_feed[self.targets[idx]] = targets[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one[idx]] = pos_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one_sum[idx]] = pos_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one_for_reg[idx]] = pos_equal_one_for_reg[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.neg_equal_one[idx]] = neg_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.neg_equal_one_sum[idx]] = neg_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+
+        # multi-gpu support for train setp
+        for idx, dev in enumerate(self.avail_gpus):
+            with tf.device('/gpu:{}'.format(dev)):
+                input_feed[self.vox_feature[idx]] = vox_feature[idx]
+                input_feed[self.vox_number[idx]] = vox_number[idx]
+                input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
+                input_feed[self.targets[idx]] = targets[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one[idx]] = pos_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one_sum[idx]] = pos_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one_for_reg[idx]] = pos_equal_one_for_reg[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.neg_equal_one[idx]] = neg_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.neg_equal_one_sum[idx]] = neg_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
         if train:
             output_feed = [self.loss, self.reg_loss,
                            self.cls_loss, self.cls_pos_loss, self.cls_neg_loss, self.gradient_norm, self.update]
@@ -209,7 +213,7 @@ class RPN3D(object):
             output_feed = [self.loss, self.reg_loss, self.cls_loss, self.cls_pos_loss, self.cls_neg_loss]
         if summary:
             output_feed.append(self.train_summary)
-        # TODO: multi-gpu support for test and predict step
+        # TODO: multi-gpu support for test and predict step(already achieved)
         return session.run(output_feed, input_feed)
 
     def validate_step(self, session, data, summary=False):
@@ -236,16 +240,18 @@ class RPN3D(object):
 
         input_feed = {}
         input_feed[self.is_train] = False
-        for idx in range(len(self.avail_gpus)):
-            input_feed[self.vox_feature[idx]] = vox_feature[idx]
-            input_feed[self.vox_number[idx]] = vox_number[idx]
-            input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
-            input_feed[self.targets[idx]] = targets[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one[idx]] = pos_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one_sum[idx]] = pos_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.pos_equal_one_for_reg[idx]] = pos_equal_one_for_reg[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.neg_equal_one[idx]] = neg_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
-            input_feed[self.neg_equal_one_sum[idx]] = neg_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+        #multi-gpu support
+        for idx, dev in enumerate(self.avail_gpus):
+            with tf.device('/gpu:{}'.format(dev)):
+                input_feed[self.vox_feature[idx]] = vox_feature[idx]
+                input_feed[self.vox_number[idx]] = vox_number[idx]
+                input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
+                input_feed[self.targets[idx]] = targets[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one[idx]] = pos_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one_sum[idx]] = pos_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.pos_equal_one_for_reg[idx]] = pos_equal_one_for_reg[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.neg_equal_one[idx]] = neg_equal_one[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
+                input_feed[self.neg_equal_one_sum[idx]] = neg_equal_one_sum[idx * self.single_batch_size:(idx + 1) * self.single_batch_size]
 
         output_feed = [self.loss, self.reg_loss, self.cls_loss]
         if summary:
@@ -279,10 +285,13 @@ class RPN3D(object):
         print('predict', tag)
         input_feed = {}
         input_feed[self.is_train] = False
-        for idx in range(len(self.avail_gpus)):
-            input_feed[self.vox_feature[idx]] = vox_feature[idx]
-            input_feed[self.vox_number[idx]] = vox_number[idx]
-            input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
+
+        #multi-gpu support
+        for idx, dev in enumerate(self.avail_gpus):
+            with tf.device('/gpu:{}'.format(dev)):
+                input_feed[self.vox_feature[idx]] = vox_feature[idx]
+                input_feed[self.vox_number[idx]] = vox_number[idx]
+                input_feed[self.vox_coordinate[idx]] = vox_coordinate[idx]
 
         output_feed = [self.prob_output, self.delta_output]
         probs, deltas = session.run(output_feed, input_feed)
@@ -295,24 +304,28 @@ class RPN3D(object):
         # NMS
         ret_box3d = []
         ret_score = []
-        for batch_id in range(len(self.avail_gpus) * self.single_batch_size):
-            # remove box with low score
-            ind = np.where(batch_probs[batch_id, :] >= cfg.RPN_SCORE_THRESH)[0]
-            tmp_boxes3d = batch_boxes3d[batch_id, ind, ...]
-            tmp_boxes2d = batch_boxes2d[batch_id, ind, ...]
-            tmp_scores = batch_probs[batch_id, ind]
+        #multi_gpu support
+        for idx, dev in enumerate(self.avail_gpus):
+            with tf.device('/gpu:{}'.format(dev)):
+                for batch_id in range(idx*self.single_batch_size,(idx+1)*self.single_batch_size):
+        #for batch_id in range(len(self.avail_gpus) * self.single_batch_size):
+                    # remove box with low score
+                    ind = np.where(batch_probs[batch_id, :] >= cfg.RPN_SCORE_THRESH)[0]
+                    tmp_boxes3d = batch_boxes3d[batch_id, ind, ...]
+                    tmp_boxes2d = batch_boxes2d[batch_id, ind, ...]
+                    tmp_scores = batch_probs[batch_id, ind]
 
-            # TODO: if possible, use rotate NMS
-            boxes2d = corner_to_standup_box2d(
-                center_to_corner_box2d(tmp_boxes2d, coordinate='lidar'))
-            ind = session.run(self.box2d_ind_after_nms, {
-                self.boxes2d: boxes2d,
-                self.boxes2d_scores: tmp_scores
-            })
-            tmp_boxes3d = tmp_boxes3d[ind, ...]
-            tmp_scores = tmp_scores[ind]
-            ret_box3d.append(tmp_boxes3d)
-            ret_score.append(tmp_scores)
+                    # TODO: if possible, use rotate NMS
+                    boxes2d = corner_to_standup_box2d(
+                        center_to_corner_box2d(tmp_boxes2d, coordinate='lidar'))
+                    ind = session.run(self.box2d_ind_after_nms, {
+                        self.boxes2d: boxes2d,
+                        self.boxes2d_scores: tmp_scores
+                    })
+                    tmp_boxes3d = tmp_boxes3d[ind, ...]
+                    tmp_scores = tmp_scores[ind]
+                    ret_box3d.append(tmp_boxes3d)
+                    ret_score.append(tmp_scores)
 
         ret_box3d_score = []
         for boxes3d, scores in zip(ret_box3d, ret_score):
