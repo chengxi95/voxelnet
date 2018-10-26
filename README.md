@@ -121,3 +121,4 @@ The current implementation and training scheme are able to produce results in th
 # Main improvement
 1. Now the `data/crop.py` can read a split file and spilt image_2, label_2, velodyne and calib into the desire folder structure
 2. Now the `utils/data_aug.py` will use each training figure's own $P_{rect}$,$R^{(0)}_{rect}$ and $T^{cam}_{velo}$ matrix from its calib file to augment data 
+3. Now the `train_step`, `validata_step` and `predict_step` in `model/model.py` also support multi-gpu calculation
