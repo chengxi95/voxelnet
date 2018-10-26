@@ -1,6 +1,6 @@
 # Introduction
 
-This is an unofficial inplementation of [VoxelNet: End-to-End Learning for Point Cloud Based 3D Object Detection](https://arxiv.org/abs/1711.06396) in TensorFlow. A large part of this project is based on the work [here](https://github.com/jeasinema/VoxelNet-tensorflow). Thanks to [@jeasinema](https://github.com/jeasinema). This work is a modified version with bugs fixed and better experimental settings to chase the results reported in the paper (still ongoing).
+This is an unofficial inplementation of [VoxelNet: End-to-End Learning for Point Cloud Based 3D Object Detection](https://arxiv.org/abs/1711.06396) in TensorFlow. A large part of this project is based on the work [here](https://github.com/jeasinema/VoxelNet-tensorflow). Thanks to [@jeasinema](https://github.com/jeasinema). This work is a modified version with bugs fixed and better experimental settings to chase the results reported in the paper. Here is a [documentation](https://github.com/chengxi95/voxelnet/blob/master/doc/Voxelnet.md) that explains most of the function in this program (still ongoing).
 
 # Dependencies
 - `python3.5+`
@@ -122,3 +122,4 @@ The current implementation and training scheme are able to produce results in th
 1. Now the `data/crop.py` can read a split file and spilt image_2, label_2, velodyne and calib into the desire folder structure
 2. Now the `utils/data_aug.py` will use each training figure's own $P_{rect}$,$R^{(0)}_{rect}$ and $T^{cam}_{velo}$ matrix from its calib file to augment data 
 3. Now the `train_step`, `validata_step` and `predict_step` in `model/model.py` also support multi-gpu calculation
+4. Add documentation
